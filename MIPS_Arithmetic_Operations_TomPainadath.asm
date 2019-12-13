@@ -1,7 +1,6 @@
-# Program file: MIPS1_Task3_TomPainadath.asm
+# Program file: MIPS_Arithmetic_Operations_TomPainadath.asm
 #       Author: Tom Painadath
-#  Description: Program to allow user to enter 64 byte string via I/O window and save to array. 
-#               The string is then copies to array Y
+#  Description: 
 
 .data
                    prompt:  .asciiz ">>>"                           #label print string that prompts user enter a string
