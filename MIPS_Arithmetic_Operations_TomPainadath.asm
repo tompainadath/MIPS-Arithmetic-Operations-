@@ -24,6 +24,7 @@
                             add $t8, $zero, $zero                   #intitilaize register $t8 by adding 0
                             add $t9, $zero, $zero
                             addi $s4, $zero, 2                      #store constant 2 in register $s4
+                            addi $s3, $zero, 8
                             
                             li $v0, 4                               #load constant 4 to $v0 to print
                             la $a0, prompt                          #load the data from data label prompt to register $a0
@@ -33,8 +34,10 @@
                             la $a0, userInput                       #load address of memory to use
                             la $a1, inputSize                       #load the maximum size of the string to read
                             syscall                                 #execute read
-          
-
+                            add $a2, $zero, $a1
+                            #addi $a2, $a1, 16
+                            add $a3, $zero, $a1
+                            #addi $a3, $a1, 40
                    strcpy:
                             addi $sp, $sp, -8                       #adjust stack for 2 item
                             sw   $s0, 0($sp)                        #save $s0
@@ -68,22 +71,35 @@
                             beq $t2, 124, Print_error               #branch to print error for not allowed char: |
                             beq $t2, 125, Print_error               #branch to print error for not allowed char: }
                             beq $t2, 126, Print_error               #branch to print error for not allowed char: ~
+                            #move $t5, $t2
+                            addi $t5, $zero, 0
                             beq $t2, 48, digit_after_space_check    #branch if the char is '0' to check if there is a space before it
+                            addi $t5, $zero, 1
                             beq $t2, 49, digit_after_space_check    #branch if the char is '1' to check if there is a space before it
+                            addi $t5, $zero, 2
                             beq $t2, 50, digit_after_space_check    #branch if the char is '2' to check if there is a space before it
+                            addi $t5, $zero, 3
                             beq $t2, 51, digit_after_space_check    #branch if the char is '3' to check if there is a space before it
+                            addi $t5, $zero, 4
                             beq $t2, 52, digit_after_space_check    #branch if the char is '4' to check if there is a space before it
+                            addi $t5, $zero, 5
                             beq $t2, 53, digit_after_space_check    #branch if the char is '5' to check if there is a space before it
+                            addi $t5, $zero, 6
                             beq $t2, 54, digit_after_space_check    #branch if the char is '6' to check if there is a space before it
+                            addi $t5, $zero, 7
                             beq $t2, 55, digit_after_space_check    #branch if the char is '7' to check if there is a space before it
+                            addi $t5, $zero, 8
                             beq $t2, 56, digit_after_space_check    #branch if the char is '8' to check if there is a space before it
+                            addi $t5, $zero, 9
                             beq $t2, 57, digit_after_space_check    #branch if the char is '9' to check if there is a space before it
-                  
+                            #move $t2, $t5
+                           # beq $t2, 49, ascii_to_number   
+         
          operator_tracker:
-                            beq $t2, 43, operand_pop                #branch if the char is '+' to load the operand from memory
-                            beq $t2, 47, operand_pop                #branch if the char is '/' to load the operand from memory
-                            beq $t2, 42, operand_pop                #branch if the char is '*' to load the operand from memory
-                            beq $t2, 45, operand_pop                #branch if the char is '+' to load the operand from memory
+                            beq $t2, 43, operand_break                #branch if the char is '+' to load the operand from memory
+                            beq $t2, 47, operand_break                #branch if the char is '/' to load the operand from memory
+                            beq $t2, 42, operand_break                #branch if the char is '*' to load the operand from memory
+                            beq $t2, 45, operand_break                  #branch if the char is '+' to load the operand from memory
                     begin:
                             beq $t2, 47, more_error_check           #branch if the char is '/' for more error check 
                             beq $t2, 42, more_error_check           #branch if the char is '*' for more error check 
@@ -98,17 +114,29 @@
                             beq $t2, 41, Paranthesis_tracker        #branch if teh char is ')' to track number of paranthesis
           
                  Continue:
-                            add $t4, $zero, $t2                     #copy the value in $t2 to $t4          
+                            add $t4, $zero, $t2                     #copy the value in $t2 to $t4     
+                               
                             add $t3, $s0, $a1                       #addr of x[i] in $t3
                             sb  $t2, 0($t3)                         #x[i] = y[i]
                             beq $t2, $zero, even_paranthesis_check  #branch if the there are no more characters left to check even paranthesis
                             addi $s0, $s0, 1                        #i = i + 1
+                            beq $t2, 48, store_operand
+                            beq $t2, 49, store_operand
+                            beq $t2, 50, store_operand
+                            beq $t2, 51, store_operand
+                            beq $t2, 52, store_operand
+                            beq $t2, 53, store_operand
+                            beq $t2, 54, store_operand
+                            beq $t2, 55, store_operand
+                            beq $t2, 56, store_operand
+                            beq $t2, 57, store_operand                            
                             j L1                                    #next iteration of loop
           
                        L2: 
                             lw  $s0, 0($sp)                         #restore saved $s0
                             addi $sp, $sp, 8                        #pop 2 items from stack
-                            jal Evaluate_expression                  #jump and link to print 'valid input' message
+                            jal second_operator_pop
+                            #jal Evaluate_expression                  #jump and link to print 'valid input' message
        
       Paranthesis_tracker:
                             addi $t6, $t6, 1                        #increment the number of paranthesis
@@ -150,7 +178,7 @@
                             jal Print_error                         #else branch to print 'Invalid input' message 
           
 digit_before_space_check:
-                           sub $t5, $t4, $t2                        #subtract current char from previous char and store the result in register $t5
+                           sub $t5, $t4, $t5                        #subtract current char from previous char and store the result in register $t5
                            beq $t5, 16, space_tracker               #branch to track number space digit combination if the char before space is a digit
                            beq $t5, 17, space_tracker               #branch to track number space digit combination if the char before space is a digit
                            beq $t5, 18, space_tracker               #branch to track number space digit combination if the char before space is a digit
@@ -165,19 +193,19 @@ digit_before_space_check:
           
  digit_after_space_check:  
                            addi $t0, $t0, 1
-                           #add $s1, $s1, $t5
-                           #beq $t9, 2, Number          
-                           sub $t5, $t2, $t4                        #subtract previous char from current char and store the result in register $t5
-                           beq $t5, 16, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 17, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 18, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 19, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 20, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 21, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 22, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 23, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 24, space_tracker               #branch to track number space digit combination if the char after space is a digit
-                           beq $t5, 25, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           add $a2, $zero, $a3
+                           #beq $t9, 2, Number                                    
+                           sub $t3, $t2, $t4                        #subtract previous char from current char and store the result in register $t5
+                           beq $t3, 16, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 17, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 18, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 19, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 20, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 21, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 22, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 23, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 24, space_tracker               #branch to track number space digit combination if the char after space is a digit
+                           beq $t3, 25, space_tracker               #branch to track number space digit combination if the char after space is a digit
                            
                            jal begin                                #else jump and link again
           
@@ -200,25 +228,80 @@ digit_before_space_check:
                            la $a0, error                           #load the data from data label 'error' to register $a0
                            syscall                                 #execute print
                            j main                                  #jump to main unconditionally
+             store_operand:
+                           #sub $a1, $zero, $s0
+                           
+                           add $t3, $s3, $a2                      #addr of x[i] in $t3
+                           sb $t5, 20($t3)                          #x[i] = y[i]
+                           addi $s3, $s3, 1                        #i = i + 1
+                           j L1
                        
-             operand_pop:  
+             operand_break:  
                            addi $t9, $t9, 1
                            beq $t9, 2, second_operator_pop
-                           lw $s5, 0($a1)                          
-                           move $s3, $s5
-                           move $t0, $t2  
-                           jal again         
+                           addi $s3, $zero, 40
+                           jal begin
+                           #lbu $s5, 0($a1)                          
+                           #move $s3, $s5
+                           #move $s2, $t2 
+                           #addi $a1, $a1, 1 
+                           #jal again         
      second_operator_pop:
+                           add $t9, $zero, $zero
+                           addi $t8, $zero, 4
                            
-                         
       Evaluate_expression:  
-                           #beq $t0, 
-                           lw $s5, 0($a1)
-                           move $s6, $s5
+                           
+                           sub $t3, $a2, $t9
+                           #add $t4, $t9, $a2
+                           lbu $s5, 31($t3)
+                           lbu $s6, 63($t3)
+                           addi $t9, $t9, 1
+                           #addi $a2, $a2, 1
+                           #addi $a3, $a3, 1
                            add $s7, $s5, $s6
+                           move $s0, $s7
+       convert_to_ascii:
+                           addi $s7, $zero, 48
+                           beq $s0, 0, print_answer
+                           addi $s7, $zero, 49
+                           beq $s0, 1, print_answer
+                           addi $s7, $zero, 50
+                           beq $s0, 2, print_answer
+                           addi $s7, $zero, 51
+                           beq $s0, 3, print_answer
+                           addi $s7, $zero, 52
+                           beq $s0, 4, print_answer
+                           addi $s7, $zero, 53
+                           beq $s0, 5, print_answer
+                           addi $s7, $zero, 54
+                           beq $s0, 6, print_answer
+                           addi $s7, $zero, 55
+                           beq $s0, 7, print_answer
+                           addi $s7, $zero, 56
+                           beq $s0, 8, print_answer
+                           addi $s7, $zero, 57
+                           beq $s0, 9, print_answer
+                           
+              overflow:
+                           addi $s0, $s0, -10
+                           jal convert_to_ascii
+        print_answer:
+                           #add $t5, $t5, $a3
+                           sb $s7, 88($a3)
+                           addi $a3, $a3, -1
+                           #addi $a3, 
+                           addi $t8, $t8, -1
+                           bne $t8, 0, Evaluate_expression
+                           
+                           lw $s7, 88($a3)
+                           move $a0, $s7
+                           li $v0, 4                               #load constant 4 in $v0 to print
+                           la $a0,92($a3)                           #load the data from data label 'error' to register $a0
+                           syscall
+                           
 
                            j main                                 #jump to main unconditionally      
                                
-
           
 
