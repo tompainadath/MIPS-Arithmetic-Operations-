@@ -230,37 +230,37 @@ digit_before_space_check:
                            j main                                  #jump to main unconditionally
              store_operand:
                            #sub $a1, $zero, $s0
-                           
+                           addi $s1, $s1, 1
                            add $t3, $s3, $a2                      #addr of x[i] in $t3
                            sb $t5, 20($t3)                          #x[i] = y[i]
                            addi $s3, $s3, 1                        #i = i + 1
                            j L1
                        
              operand_break:  
+                           #move $s1, $v1
+                           add $s1, $zero, $zero
                            addi $t9, $t9, 1
                            beq $t9, 2, second_operator_pop
                            addi $s3, $zero, 40
                            jal begin
-                           #lbu $s5, 0($a1)                          
-                           #move $s3, $s5
-                           #move $s2, $t2 
-                           #addi $a1, $a1, 1 
-                           #jal again         
+                           
      second_operator_pop:
                            add $t9, $zero, $zero
                            addi $t8, $zero, 4
                            
-      Evaluate_expression:  
+      Evaluate_expression:    
                            
+                           #beq $t1, 0, print_answer
+                           beq $s1, 0, print_answer    
+                           #addi $v1, $v1, -1
+                           addi $s1, $s1, -1                  
                            sub $t3, $a2, $t9
-                           #add $t4, $t9, $a2
                            lbu $s5, 31($t3)
                            lbu $s6, 63($t3)
                            addi $t9, $t9, 1
-                           #addi $a2, $a2, 1
-                           #addi $a3, $a3, 1
                            add $s7, $s5, $s6
                            move $s0, $s7
+
        convert_to_ascii:
                            addi $s7, $zero, 48
                            beq $s0, 0, print_answer
@@ -287,21 +287,20 @@ digit_before_space_check:
                            addi $s0, $s0, -10
                            jal convert_to_ascii
         print_answer:
-                           #add $t5, $t5, $a3
-                           sb $s7, 88($a3)
+                           sb $s7, 87($a3)
                            addi $a3, $a3, -1
-                           #addi $a3, 
                            addi $t8, $t8, -1
                            bne $t8, 0, Evaluate_expression
-                           
-                           lw $s7, 88($a3)
-                           move $a0, $s7
+             print_final:
                            li $v0, 4                               #load constant 4 in $v0 to print
-                           la $a0,92($a3)                           #load the data from data label 'error' to register $a0
-                           syscall
-                           
-
+                           #li $a1, 3
+                           la $a0,88($a3)                           #load the data from data label 'error' to register $a0
+                           syscall                           
                            j main                                 #jump to main unconditionally      
                                
+
+          
+
+          
           
 
