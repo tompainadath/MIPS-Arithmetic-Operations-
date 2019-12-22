@@ -294,9 +294,9 @@ digit_before_space_check:
              print_final:
                            li $v0, 4                               #load constant 4 in $v0 to print
                            #li $a1, 3
-                           la $a0,88($a3)                           #load the data from data label 'error' to register $a0
+                           la $a0,88($a3)                          #load the data from data label 'error' to register $a0
                            syscall                           
-                           j main                                 #jump to main unconditionally      
+                           j main                                  #jump to main unconditionally      
                                
 
           
